@@ -6,40 +6,16 @@ import modelo.Tablero;
 public class TresNRaya {
 	// El tablero tiene los valores iniciales necesarios par comenzar el juego
 	// Equivale al metodo iniciar juego
-	private Tablero tablero=new Tablero();
-	public int numerojugada = 2;
-	public int origenx, origeny;
-
+	
+	public Coordenada origen=new Coordenada(0, 0),destino=new Coordenada(0, 0);
 	// botonx botony almacena las coordenadas de la casilla destino
-	public int destinox, destinoy;
 	// Cuando mover est� a true significa que la pieza seleccionada es para mover
 	// Si est� a false la casilla seleccionada no est
 	public boolean mover = true;
 
-	/**
-	 * Comprueba si la casilla destino es contigua a la casilla origen
-	 * 
-	 * @return True si es contigua false en caso contrario
-	 */
-	private boolean casillaContigua() {
-		int x = destinox - origenx, y = destinoy - origeny;
-		if (x > -2 && x < 2 && y > -2 && y < 2)
-			return true;
-		return false;
 
-	}
 
-	/**
-	 * Informa de quien es el turno actual
-	 * 
-	 * @return 1 o 0 dependiendo de quien sea el propietario del turno
-	 */
-	public int verTurno() {
-		if (numerojugada % 2 == 0)
-			return 2;
-		return 1;
 
-	}
 
 	
 
@@ -59,9 +35,9 @@ public class TresNRaya {
 		// haya metido la casilla origen
 		if (numerojugada > 6) {
 			if (!mover) {
-				if (casillaContigua() && tablero.mirarCasillaLibre(new Coordenada(destinox, destinoy))) {
-					tablero.setValorPosicion(new Coordenada(origenx, origeny),0);
-					tablero.setValorPosicion(new Coordenada(destinox, destinoy),verTurno());
+				if (origen.casillaContigua(destino) && tablero.mirarCasillaLibre(destino)) {
+					tablero.setValorPosicion(origen,0);
+					tablero.setValorPosicion(destino,verTurno());
 					mover = true;
 					numerojugada++;
 					return true;
@@ -70,9 +46,8 @@ public class TresNRaya {
 					return false;
 			} // if(mover)
 			else {
-				if (tablero.comprobarPropiedad(new Coordenada(destinox, destinoy),verTurno()) && tablero.comprobarBloqueada(new Coordenada(destinox, destinoy))) {
-					origenx = destinox;
-					origeny = destinoy;
+				if (tablero.comprobarPropiedad(destino,verTurno()) && tablero.comprobarBloqueada(destino)) {
+					origen.asignarCoordenada(destino);
 					mover = false;
 					return true;
 				} // if(comprobarPropiedad()&&comprobarBloqueada()
@@ -80,8 +55,8 @@ public class TresNRaya {
 					return false;
 			} // if(!mover&&!colocar){
 		} // if (numerojugada>6){
-		else if (tablero.mirarCasillaLibre(new Coordenada(destinox, destinoy))) {
-			tablero.setValorPosicion(new Coordenada(destinox, destinoy),verTurno());
+		else if (tablero.mirarCasillaLibre(destino)) {
+			tablero.setValorPosicion(destino,verTurno());
 			incrementaJugada();
 			// Si ha modificado el tablero
 			return true;
@@ -141,19 +116,19 @@ public class TresNRaya {
 
 	public String indicarAnomalia() {
 		if (numerojugada <= 6) {
-			if (!tablero.mirarCasillaLibre(new Coordenada(destinox, destinoy)))
+			if (!tablero.mirarCasillaLibre(destino))
 				return "La casilla no est� libre";
 		} else {
 			if (mover) {
-				if (!tablero.comprobarPropiedad(new Coordenada(destinox, destinoy),verTurno()) )
+				if (!tablero.comprobarPropiedad(destino,verTurno()) )
 					return "La pieza elegida no es correcta";
-				if (!tablero.comprobarBloqueada(new Coordenada(destinox, destinoy)))
+				if (!tablero.comprobarBloqueada(destino))
 					return "La pieza seleccionada esta bloqueada";
 			} // if
 			else {
-				if (!tablero.mirarCasillaLibre(new Coordenada(destinox, destinoy)))
+				if (!tablero.mirarCasillaLibre(destino))
 					return "La casilla no est� libre";
-				if (!casillaContigua())
+				if (!origen.casillaContigua(destino))
 					return "Casilla no contigua";
 
 			} // else
